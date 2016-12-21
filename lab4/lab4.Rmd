@@ -1,0 +1,79 @@
+---
+title: "lab4"
+output: html_document
+---
+###Задание
+
+```{r}
+library(MASS)
+data(cats)
+help(cats)
+
+#команда summary(cats) выводит пол и данные массы сердца и веса
+summary(cats)
+
+m <- mean(cats$Hwt)
+sk <- sd(cats$Hwt)
+dis <- var(cats$Hwt)
+
+#рассчет параметров
+a <- round(m^2/dis, 2)
+s <- round(dis/m, 2)
+
+#Напишите функцию для расчёта параметров a и s через дисперсию и среднее для передаваемого вектора чисел
+
+my.gamma <- function(x)
+{
+  m <- mean(x)
+dis <- var(x)
+a <- round(m^2/dis, 2)
+s <- round(dis/m, 2)
+return(c(a,s))
+}
+
+#Какие результаты возвращает функция для вектора весов сердец? Сходятся ли они с ответами в п. 4? Должны сходиться?
+my.gamma(cats$Hwt) #результаты сходятся, т.к функция правильно реализована
+
+
+#Постройте гистограмму весов. Добавьте на гистограмму кривую плотности вероятности при помощи функций curve и dgamma, указав ранее найденные параметры формы и масштаба.
+hist(cats$Hwt, xlab="Вес сердца",probability = T)
+curve(dgamma(x,shape = my.gamma(cats$Hwt)[1], scale = my.gamma(cats$Hwt)[2]), add = T, col = "blue")
+
+#Получите параметры a и s отдельно для котов и кошек, использовав функцию my.gamma.
+ my.gamma(cats$Hwt[cats$Sex=="M"])
+ my.gamma(cats$Hwt[cats$Sex=="F"])
+
+#Постройте полученные функции распределения на одном графике, используя curve и dgamma
+hist(cats$Hwt, xlab="Вес сердца", probability = T)
+curve(dgamma(x,shape = my.gamma(cats$Hwt[cats$Sex=="M"])[1],scale =my.gamma(cats$Hwt[cats$Sex=="M"])[2]),add = T, col="pink")
+curve(dgamma(x,shape =my.gamma(cats$Hwt[cats$Sex=="F"])[1],scale =my.gamma(cats$Hwt[cats$Sex=="F"])[2]),add = T, col="blue")
+
+#Случайным образом разделите данные на две группы одного размера равного количеству котов и кошек соответственно. Получите гамма-параметры для обеих групп. Повторите эксперимент несколько раз. Найдите среднюю разницу между результатами групп.
+male <- cats[cats$Sex == "M",]
+female <- cats[cats$Sex == "F",]
+p <- data.frame(a1=0,s1=0,a2=0,s2=0)
+for(k in 1:10){
+  n1 <- sample(dim(male)[1])
+  n2 <- sample(dim(female)[1])
+  n1.1 <- male[n1[1:as.integer(length((n1)/2))],]
+  n1.2 <- male[n1[ceiling(length(n1)/2):(length(n1)-1)],] 
+  n2.1 <- female[n2[1:as.integer(length(n2)/2)],] 
+  n2.2 <- female[n2[ceiling(length(n2)/2):(length(n2)-1)],] 
+  group1 <- rbind(n1.1, n2.1) 
+  group2 <- rbind(n1.2, n2.2) 
+  p1 <- my.gamma(group1$Hwt) 
+  p2 <- my.gamma(group2$Hwt) 
+  P <- data.frame(a1=p1[1], s1=p1[2], a2=p2[1], s2=p2[2]) 
+  p <- rbind(p, P) 
+  } 
+
+p<- p[-1, ] 
+
+# Средняя разница 
+dif_a <- abs(mean(p[ , c("a1")]-p[ , c("a2")])) 
+dif_s <- abs(mean(p[ , c("s1")]-p[ , c("s2")]))
+
+# По полученным распределениям для кошек и котов можно сделать вывод, что вес сердца кошек приближен к 9, а у котов к 11 с выраженным пиком. 
+  
+
+```

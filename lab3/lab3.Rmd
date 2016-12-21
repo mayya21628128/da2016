@@ -1,0 +1,57 @@
+---
+title: "lab3"
+output: html_document
+---
+#Задание 1
+
+```{r}
+
+data <- readLines("https://raw.githubusercontent.com/SergeyMirvoda/da2016/master/data/forbes.htm")
+
+length(data)
+
+sum(nchar(data))
+
+shablon <- "[$](\\d{1,2}[,]?\\d?)\\sB"
+length(grep(shablon,data))
+worth <- grep(shablon,data)
+match <- regmatches(data,regexpr(shablon,data))
+length(match)
+match[1]
+length(match[match == "$72 B"])
+match[3]
+length(match[match == "$41 B"])
+
+length(match[match == "$10 B"])
+length(match[match == "$14 B"])
+```
+
+###Задание2
+
+```{r}
+
+worth <- substr(match,2,nchar(match)-2)
+worth <- sub(",",".",worth)
+worth <- as.numeric(worth)*10^9
+
+length(worth)
+typeof(worth)
+
+length(worth[worth>=10^9])
+max(worth)
+
+median(worth)
+min(worth)
+
+length(worth[worth>=5e9])
+length(worth[worth>=10e9])
+length(worth[worth>=25e9])
+
+sum(worth)
+sum(worth[1:5])/sum(worth)
+sum(worth[1:20])/sum(worth)
+
+hnw <- 78.773e9
+hnw/sum(worth)
+
+```

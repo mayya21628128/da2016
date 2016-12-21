@@ -1,0 +1,76 @@
+---
+title: "lab5"
+output: html_document
+---
+
+###Задание
+
+```{r}
+
+library(MASS)
+
+
+ gamma.estimate <- function(data) {
+      m <- mean(data)
+      v <- var(data)
+      s <- v/m
+      a <- m/s
+      return(c(a=a,s=s))
+ }
+
+cats4 <- cats[1:4,]
+
+
+c1 <- gamma.estimate(cats4$Hwt[-1])
+c2 <- gamma.estimate(cats4$Hwt[-2])
+c3 <- gamma.estimate(cats4$Hwt[-3])
+c4 <- gamma.estimate(cats4$Hwt[-4])
+allcats <- rbind(c1,c2,c3,c4)
+#a
+sqrt((length(allcats[,1])-1)^2/length(allcats[,1])*var(allcats[,1]))
+#s
+sqrt((length(allcats[,2])-1)^2/length(allcats[,2])*var(allcats[,2]))
+
+#Напишите функцию my.gamma.jk(), принимающую вектор и возвращающую стандартные ошибки для a и b. 
+my.gamma.jk <- function(x)
+{
+  P <- data.frame(a=0, s=0)
+  for (i in 1:NROW(x))
+  {
+    p <- data.frame(a = gamma.estimate(x[-i])[1], s = gamma.estimate(x[-i])[2])
+    P <- rbind(P, p)
+  }
+  P <- P[-1,]
+  er_a <- (length(P[,1])-1)^2/length(P[,1])*var(P[,1])
+  er_s <- (length(P[,2])-1)^2/length(P[,2])*var(P[,2])
+  return(c(er_a=sqrt(er_a),er_s=sqrt(er_s)))
+}
+
+#Вызовите написанную функцию для данных из п.2. Сходятся ли полученные значения?
+my.gamma.jk(cats4$Hwt)
+# Полученные значения совпадают
+
+#Вызовите написанную функцию для получения стандартных ошибок a и s для полного набора данных.
+my.gamma.jk(cats$Hwt)
+
+
+#Рассчитайте параметры a и s раздельно для кошек и котов. Найдите jackknife SE для полученных параметров (всего 4)
+#кошки:
+d1 <- gamma.estimate(cats$Hwt[cats$Sex=="F"])
+se1 <- my.gamma.jk(cats$Hwt[cats$Sex=="F"])
+#коты
+d2 <- gamma.estimate(cats$Hwt[cats$Sex=="M"])
+se2 <- my.gamma.jk(cats$Hwt[cats$Sex=="M"])
+
+
+#Стандартная ошибка разницы между двумя независимыми количественными оценками d1 и d2 равняется:sqrt(se1^2 + se2^2), где se1 и se2 стандартные отклонения для d1 и d2 соответственно. Рассчитайте разницу оцениваемых параметров между кошками и котами и стандартное отклонение разницы.
+dif_a <- abs(d1[1]-d2[1])
+dif_s <- abs(d1[2]-d2[2])
+
+se_a <- sqrt(se1[1]^2+se2[1]^2)
+se_s <- sqrt(se1[2]^2+se2[2]^2)
+
+#Означают ли полученные из предыдущего пункта значения, что наблюдается значимое влияние пола на вес сердца? Поясните ответ
+  #Вес сердца зависит от пола, т.к слишком большой размах между параметрами двух групп
+
+```

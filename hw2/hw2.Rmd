@@ -1,0 +1,112 @@
+---
+title: "hw2"
+output: html_document
+---
+
+###Домашняя работа2. Основы исследовательского анализа данных.
+
+###Загрузка и очистка данных
+
+```{r}
+
+data <- read.csv("https://raw.githubusercontent.com/SergeyMirvoda/da2016/master/data/calif_penn_2011.csv")
+nrow(data)
+ncol(data)
+
+colSums(apply(data,c(1,2), is.na)) #данная команда применяет функцию is.na на каждый элемет и подсчитывает количесвто NA в каждом столбце
+
+may <- na.omit(data)
+nrow(data)-nrow(may)
+
+#Результат выполнения не соответствует значениям из пункта 3, т.к несколько NA может присутствовать в каждой строчке
+
+```
+
+###Новые дома
+```{r}
+
+Built_2005_or_later <- may$Built_2005_or_later
+MMV <- may$Median_house_value
+plot(Built_2005_or_later,MMV)
+
+Built_2005_or_later.6 <- may$Built_2005_or_later[may$STATEFP==6]
+MMV.6 <- may$Median_house_value[may$STATEFP==6]
+plot(Built_2005_or_later.6,MMV.6)
+
+Built_2005_or_later.42 <- may$Built_2005_or_later[may$STATEFP==42]
+MMV.42 <- may$Median_house_value[may$STATEFP==42]
+plot(Built_2005_or_later.42,MMV.42)
+
+
+```
+
+###Незанятые дома
+
+```{r}
+
+may$vacancy_rate <- may$Vacant_units/may$Total_units
+max(may$vacancy_rate)
+min(may$vacancy_rate)
+mean(may$vacancy_rate)
+median(may$vacancy_rate)
+
+plot(may$Median_house_value,may$vacancy_rate,xlab="Medan_house_value",ylab="Vacancy_rate")
+
+#На диаграмме можно заметить, что доля незанятых домов уменьшается  с ростом медианы стоимости домов
+```
+###Корреляция
+
+```{r}
+acc <- c()
+for (tract in 1:nrow(may)) {
+  if (may$STATEFP[tract] == 6) {
+    if (may$COUNTYFP[tract] == 1) {
+      acc <- c(acc, tract)
+    }
+  }
+}
+accmv <- c()
+for (tract in acc) {
+  accmv <- c(accmv, may[tract,10])
+}
+median(accmv)
+
+#Данный код рабоатет с исходными датафрейма. В 1 цикле выбирает строки , соответствующие определенному штату и округу, и записывает в acc.Второй цикл выбирает из acc значения 10 столбца и median подсчитывает медиану
+
+median(may$Median_house_value[may$STATEFP==6 & may$COUNTYFP==1])
+
+mean(may$Total_units[may$STATEFP==6 & may$COUNTYFP==7])
+mean(may$Total_units[may$STATEFP==6 & may$COUNTYFP==85])
+mean(may$Total_units[may$STATEFP==42 & may$COUNTYFP==133])
+
+#для всех данных
+cor(may$Median_house_value, may$Built_2005_or_later)
+
+#для калифорнии
+cor(may$Median_house_value[may$STATEFP==6], may$Built_2005_or_later[may$STATEFP==6])
+
+#для пенсильвании
+cor(may$Median_house_value[may$STATEFP==42], may$Built_2005_or_later[may$STATEFP==42])
+
+#для Butte County
+cor(may$Median_house_value[may$STATEFP==6 & may$COUNTYFP==7], may$Built_2005_or_later[may$STATEFP==6 & may$COUNTYFP==7])
+
+#для Santa Clara
+cor(may$Median_house_value[may$STATEFP==6 & may$COUNTYFP==85], may$Built_2005_or_later[may$STATEFP==6 & may$COUNTYFP==85])
+
+#для York County
+cor(may$Median_house_value[may$STATEFP==42 & may$COUNTYFP==133], may$Built_2005_or_later[may$STATEFP==42 & may$COUNTYFP==133])
+
+#для Butte County
+plot(may$Median_household_income[may$STATEFP==6 & may$COUNTYFP==7], may$Median_house_value[may$STATEFP==6 & may$COUNTYFP==7])
+
+#для Santa Clara
+plot(may$Median_household_income[may$STATEFP==6 & may$COUNTYFP==85], may$Median_house_value[may$STATEFP==6 & may$COUNTYFP==85])
+
+
+#для York County
+plot(may$Median_household_income[may$STATEFP==42 & may$COUNTYFP==133], may$Median_house_value[may$STATEFP==42 & may$COUNTYFP==133])
+
+
+
+```

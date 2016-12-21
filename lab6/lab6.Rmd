@@ -1,0 +1,66 @@
+---
+title: "lab6"
+output: html_document
+---
+
+###Задание1
+
+```{r}
+data <- read.csv('https://raw.githubusercontent.com/SergeyMirvoda/da2016/master/lab6/wtid-report.csv')
+
+may<-data.frame(Year=data$Year,P99=data$P99.income.threshold,P99.5=data$P99.5.income.threshold,P99.9=data$P99.9.income.threshold)
+
+may$P99[may$Year==1972]
+may$P99.5[may$Year==1942]
+may$P99.9[may$Year==1922]
+
+plot(may$Year,may$P99,xlab = 'year', ylab = 'income P99')
+plot(may$Year,may$P99.5,xlab = 'year', ylab = 'income P99.5')
+plot(may$Year,may$P99.9,xlab = 'year', ylab = 'income P99.9')
+
+my.exp.estimate_ratio =function(x,y){
+a<-1-log(10)/log(x/y)
+return(a)
+}
+
+my.exp.estimate_ratio(10^6,10^7)
+
+```
+
+###Задание 2
+
+```{r}
+may$a <- my.exp.estimate_ratio(may$P99,may$P99.9)
+
+plot(may$Year,may$a,xlab='year',ylab='a')
+
+y1=c(min(may$P99,may$P99.9),max(may$P99,may$P99.9))
+plot(may$Year,may$P99,xlab = 'year',ylim=y1 ,ylab = 'income',col='blue')
+par(new=TRUE)
+plot(may$Year,may$P99.9,xlab = ' ', ylab = " ",ylim=y1,col='pink')
+par(new=TRUE)
+plot(may$Year,may$a,xlab='',ylab='')
+#Чем больше a тем ближе к финкции распределения P99 и P99.9
+
+#Используя полученную для 2012 года оценку параметра a проверьте выполняется ли принцип Парето (20% популяции владеет 80 % богатства) однако зависит от конкретной величины k)
+a2012<-may$a[may$Year=="2012"]
+
+x_max<-max(may[may$Year=="2012",])
+pr<-(x_max*0.8/x_max)^(-a2012+1)
+#80% богатства владеют 30% популяции
+
+
+#Из выражения (3) можно вывести следующее: (P99.5/P99.9)^(-a+1) = 5. Напишите функцию, которая будет принимать P99.5, P99.9 и a , и вычислять левую часть выражения. Отобразите полученное на графике. На нём же отобразите горизонтальную прямую с вертикальной координатой равной 5 (при помощи команды abline). Насколько качественно выполнена подгонка модели?
+
+plot(may$Year,(may$P99.5/may$P99.9)^(-may$a+1), xlab = "year",ylab="P99.5/P99.9)^(-a+1) = 5")
+abline(h = 5, col = "blue")
+#подгонка качествена
+
+#Тоже самое верно и для: (P90/P95)^(-a+1) = 2. Повторите предыдущее для этой формулы. Что можно сказать, сравнив эти подгонки?
+
+plot(data$Year,(data$P90/data$P95)^(-may$a+1), xlab = "year",ylab="P90/P95)^(-a+1) = 2")
+abline(h = 2, col = "blue")
+#сравнив подгонки, можно сказать, что эта не качествена
+
+
+```
